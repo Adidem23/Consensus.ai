@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+mcp
+python-dotenv
+requests
+httpx 
+pydantic 
+a2a-sdk[http-server]>=0.3.0
+langgraph 
+google-adk
+langchain-mcp-adapters
+motor
