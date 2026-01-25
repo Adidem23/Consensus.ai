@@ -11,3 +11,4 @@ google-adk
 langchain-mcp-adapters
 motor
 httpx
+mistralai

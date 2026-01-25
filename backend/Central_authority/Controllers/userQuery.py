@@ -16,3 +16,22 @@ async def uploadRecordB(agentquery:AgentQueryObject):
     first_query_object=agentquery
     await create_document(first_query_object)
     return {"messgage":f'Record uploaded for the {agentquery.Agent_Node_name} with query {agentquery.query}'}
+
+@router.post("/searchForOtherRecords")
+async def searchOtherModelRecords(agentQuery:AgentQueryObject):
+    records=await read_all_documents({
+        "Agent_Node_name":{"$ne":f'{agentQuery.Agent_Node_name}'}
+    })
+
+    if(records):
+        return records
+    else:
+        return None
+
+@router.post("/updateCritique")
+async def updateCritiques(agentQuery:AgentQueryObject):
+    await update_document({"Agent_Node_name":agentQuery.Agent_Node_name},{
+        "$push": {
+            "Critiques":agentQuery.Critiques
+        }
+    })

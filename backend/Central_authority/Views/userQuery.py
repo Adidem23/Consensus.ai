@@ -3,7 +3,8 @@ from typing_extensions import Annotated
 import operator
 
 class critiqueClass(BaseModel):
-    Agent_Node_name:str | None
+    Given_By_Agent:str | None
+    Given_To_Agent : str | None
     Critique : str | None
 
 class AgentQueryObject(BaseModel):

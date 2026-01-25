@@ -26,7 +26,7 @@ if __name__=="__main__":
     ]
     )
 
-    print(chat_response)
+    print(chat_response.choices[0].message.content)
     
     end_time=time.time()
 
