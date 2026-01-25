@@ -20,12 +20,7 @@ async def processUserQuery(request:userBackendQuery):
 
     new_client=Agent_Client_Class()
 
-    response=await new_client.create_connection(SUPERVISOR_NODE_BASE_URL,user_query)
+    response= await new_client.create_connection(SUPERVISOR_NODE_BASE_URL,user_query)
 
-    print(response)
-
-    return response
-
-
-
-    
+    if(response):
+        return response    

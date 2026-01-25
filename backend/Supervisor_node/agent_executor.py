@@ -25,7 +25,6 @@ class SupervisorAgentExecutor(AgentExecutor):
 
         # final_response=await self.agent.giveFinalAnswer(response1,response2)
 
-
         await event_queue.enqueue_event(
             TaskArtifactUpdateEvent(
                 context_id=context.context_id,

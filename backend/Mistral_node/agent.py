@@ -4,67 +4,82 @@ import httpx
 import asyncio
 from dotenv import load_dotenv
 from mistralai import Mistral
-from mistralai.async_client import MistralAsyncClient
-from mistralai.models.chat_completion import ChatMessage
 from langgraph.graph import START , StateGraph , END
-from langchain.messages import HumanMessage , SystemMessage , ToolMessage ,AnyMessage
+from langchain.messages import AnyMessage ,HumanMessage
 from typing_extensions import Annotated , TypedDict
 from langgraph.types import Command
-from pydantic import BaseModel
 
-MISTRAL_API_KEY=os.getenv("b24wuVREw1GT4wJyeZSKAAdHNXrbgibU","")
+load_dotenv()
 
-client = Mistral(api_key=MISTRAL_API_KEY)
-mistral_client = MistralAsyncClient(api_key=MISTRAL_API_KEY)
+MISTRAL_API_KEY=os.getenv("MISTRAL_API_KEY","")
+
 
 class AgentState(TypedDict):
     user_msgs:Annotated[list[AnyMessage],operator.add]
     query: str | None
     llm_count:int
 
+async def Generate_Critique_mistral(data):
+        
+        client = Mistral(api_key=MISTRAL_API_KEY)
 
-model="mistral-medium-latest"
-
-
-async def Generate_Critique_mistal(state:AgentState,data:dict):
+        model="mistral-medium-latest"
+        
         critique_prompt = f"""
-You are a critique agent in a multi-LLM debate system.
+        You are a critique agent in a multi-LLM debate system.
 
-Another agent has produced the following answer:
+        Another agent has produced the following answer:
 
-ANSWER:
-{data["Agent_first_Output"]}
+        ANSWER:
+        {data["Agent_first_Output"]}
 
-Your task:
-- Identify factual errors
-- Identify missing assumptions
-- Identify logical gaps or ambiguities
-- Identify unsupported claims
+        Your task is to critically evaluate the answer.
 
-Rules:
-- Do NOT rewrite the answer
-- Do NOT provide a better answer
-- Be precise and concrete
-- If no major issues exist, say: "No major issues found."
+        You must identify:
+        - Any factual inaccuracies or imprecise statements.
+        - Missing assumptions, prerequisites, or context.
+        - Logical gaps, ambiguities, or unclear reasoning.
+        - Claims that are asserted without adequate justification.
+        - Oversimplifications or important edge cases not addressed.
 
-Output:
-- Critique text only.
+        Rules:
+        - Do NOT rewrite the answer.
+        - Do NOT provide an alternative or improved answer.
+        - Do NOT summarize or agree with the answer.
+        - Be precise, concrete, and technical.
+        - Use short bullet points where appropriate.
+
+        Evaluation standard:
+        - Assume the answer can be improved unless it is fully correct, complete, and well-scoped.
+        - If the answer is mostly correct, critique limitations in depth, scope, or rigor.
+
+
+        Output:
+        - Critique text only.
+
 """
-
-        completion = await mistral_client.chat(
-        model="mistral-medium-latest",
-        messages=[
-            ChatMessage(role="user", content=critique_prompt)
-        ],
-        temperature=0.2
-        )
+       
+        completion=client.chat.complete(
+        model = model,
+        messages = [
+            {
+                "role":"system",
+                "content":critique_prompt
+            },
+            {
+                "role": "user",
+                "content": f"give me the critique with instruction provided for {data['Agent_first_Output']}",
+            },
+        ]
+   )
+        
 
         critique_text = completion.choices[0].message.content
 
         try:
             async with httpx.AsyncClient(timeout=60) as client:
                         Update_data_Critique={
-                           "Agent_Node_name":data['Agent_first_Output'],
+                           "Agent_Node_name":data['Agent_Node_name'],
                             "query":data['query'],
                             "Agent_first_Output": data['Agent_first_Output'],
                             "final_output":"",
@@ -81,10 +96,7 @@ Output:
                         
                         http_response.raise_for_status()
 
-                        return 
-            Command(
-         update={"user_msgs":state['user_msgs']+[completion],"llm_count":state.get('llm_count')+1},goto=END
-        )
+                       
             
         except Exception as e:
                     return e
@@ -109,19 +121,22 @@ async def startDebate(CA_Query):
 
                 if records:
                     for record in records:
-                        await Generate_Critique_mistal(record)
+                        await Generate_Critique_mistral(record)
                     return 
 
                 await asyncio.sleep(POLL_INTERVAL)
 
 async def normal_response_call(state:AgentState):
+    client = Mistral(api_key=MISTRAL_API_KEY)
+
+    model="mistral-medium-latest"
     
     chat_response = client.chat.complete(
     model = model,
     messages = [
         {
             "role": "user",
-            "content": f'{state['query']}',
+            "content": f"{state['query']}",
         },
     ]
    )
@@ -146,12 +161,14 @@ async def normal_response_call(state:AgentState):
 
             await startDebate(CA_Query)
 
+            return Command(
+         update={"user_msgs":state['user_msgs']+[chat_response],"llm_count":state.get('llm_count',0)+1},goto=END
+    )
+
     except Exception as e:
                     return e
 
-    Command(
-         update={"user_msgs":state['user_msgs']+[chat_response],"llm_count":state.get('llm_count')+1}
-    )
+    
 
 
 builder=StateGraph(AgentState)
@@ -161,3 +178,12 @@ builder.add_node("normal_response_call",normal_response_call)
 builder.add_edge(START,"normal_response_call")
 
 mistral_agent=builder.compile()
+
+async def runagent():
+      user_input=input('Enter : ')
+      messages = [HumanMessage(content=user_input)]
+      messages =await mistral_agent.ainvoke({"messages": messages,"query":user_input})
+      print(messages)
+
+if __name__=="__main__":
+      asyncio.run(runagent())

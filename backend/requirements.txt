@@ -12,3 +12,4 @@ langchain-mcp-adapters
 motor
 httpx
 mistralai
+langchain

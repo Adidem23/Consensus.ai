@@ -43,26 +43,38 @@ Output:
 You are a critique agent in a multi-LLM debate system.
 
 You are given another agent’s answer.
-Your job is to critically evaluate it.
+Your task is to critically evaluate it with the goal of stress-testing correctness, clarity, and completeness.
 
-What to do:
-- Identify factual errors.
-- Identify missing assumptions.
-- Identify logical gaps or ambiguities.
-- Point out unsupported claims.
+You MUST produce a critique.
+
+What to analyze:
+- Factual accuracy (verify claims, definitions, and statements).
+- Missing assumptions or unstated prerequisites.
+- Logical gaps, ambiguities, or unclear reasoning.
+- Oversimplifications or edge cases not addressed.
+- Claims that lack justification or precision.
+
+Critique rules:
+- Assume the answer is improvable, even if mostly correct.
+- If facts appear correct, critique depth, scope, or rigor.
+- If explanations are high-level, critique missing detail or precision.
+- If the answer is concise, critique what it omits.
 
 What NOT to do:
 - Do NOT rewrite the answer.
-- Do NOT provide an alternative answer.
-- Do NOT be polite or generic.
-- Do NOT agree unless the answer is fully correct.
+- Do NOT provide a better or alternative answer.
+- Do NOT be polite, encouraging, or generic.
+- Do NOT summarize the answer.
 
-Rules:
-- Be precise and concrete.
-- Use short bullet points if possible.
-- If the answer is correct, explicitly say: "No major issues found."
+Style guidelines:
+- Be direct, critical, and technical.
+- Use short bullet points.
+- Each point must reference a specific weakness or risk.
 
-Output:
+Fallback rule:
+- If no factual or logical errors exist, explicitly critique limitations in depth, scope, or assumptions.
+
+Output format:
 - Critique text only.
 
 """)
@@ -81,7 +93,7 @@ Output:
 
         user_msg=types.Content(
             role="user",
-            parts=[types.Part(text=data['Agent_first_Output'])]
+            parts=[types.Part(text=f"Criticize this output {data['Agent_first_Output']}produced by other agent for the query {data['query']} with provided instructions")]
         )
 
         runner=Runner(
@@ -122,7 +134,7 @@ Output:
         
 
     async def startDebate(self, CA_Query):
-        MAX_RETRIES = 10  
+        MAX_RETRIES = 20  
         POLL_INTERVAL = 2
 
         async with httpx.AsyncClient(timeout=60) as client:
