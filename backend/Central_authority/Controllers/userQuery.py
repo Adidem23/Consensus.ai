@@ -1,50 +1,64 @@
-import os
+import asyncio
+from collections import defaultdict
 from fastapi import APIRouter
 from Views.userQuery import AgentQueryObject
-# from client_class import Agent_Client_Class
 from Model.agentQuery import *
 
-router=APIRouter(prefix="/agentquery")
+router = APIRouter(prefix="/agentquery")
+
+agent_locks = defaultdict(asyncio.Lock)
 
 @router.get("/")
-def breathingMessage():
-    return {"message":"Server is Up and Running!!"}
+async def breathingMessage():
+    return {"message": "Server is Up and Running!!"}
+
 
 @router.post("/uploadRecord")
-async def uploadRecordB(agentquery:AgentQueryObject):
-    print(agentquery)
-    first_query_object=agentquery
-    await create_document(first_query_object.model_dump())
-    return {"messgage":f'Record uploaded for the {agentquery.Agent_Node_name} with query {agentquery.query}'}
+async def uploadRecordB(agentquery: AgentQueryObject):
+    lock = agent_locks[agentquery.Agent_Node_name]
+
+    async with lock:
+        await create_document(agentquery.model_dump())
+
+        return {
+            "message": f"Record uploaded for {agentquery.Agent_Node_name} with query {agentquery.query}"
+        }
+
 
 @router.post("/searchForOtherRecords")
-async def searchOtherModelRecords(agentQuery:AgentQueryObject):
-    records=await read_all_documents({
-        "Agent_Node_name":{"$ne":f'{agentQuery.Agent_Node_name}'}
-    })
+async def searchOtherModelRecords(agentQuery: AgentQueryObject):
+    lock = agent_locks[agentQuery.Agent_Node_name]
 
-    for record in records:
-        record["_id"] = str(record["_id"])
+    async with lock:
+        records = await read_all_documents({
+            "Agent_Node_name": {"$ne": agentQuery.Agent_Node_name}
+        })
 
-    return records
+        for record in records:
+            record["_id"] = str(record["_id"])
+
+        return records
+
 
 @router.post("/updateCritique")
 async def updateCritiques(agentQuery: AgentQueryObject):
+    lock = agent_locks[agentQuery.Agent_Node_name]
 
-    critiques_as_dicts = [
-        critique.model_dump()
-        for critique in agentQuery.Critiques
-    ]
+    async with lock:
+        critiques_as_dicts = [
+            critique.model_dump()
+            for critique in agentQuery.Critiques
+        ]
 
-    await update_document(
-        {"Agent_Node_name": agentQuery.Agent_Node_name},
-        {
-            "$push": {
-                "Critiques": {
-                    "$each": critiques_as_dicts
+        await update_document(
+            {"Agent_Node_name": agentQuery.Agent_Node_name},
+            {
+                "$push": {
+                    "Critiques": {
+                        "$each": critiques_as_dicts
+                    }
                 }
             }
-        }
-    )
+        )
 
     return {"message": "Critiques updated successfully"}

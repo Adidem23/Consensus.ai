@@ -95,9 +95,7 @@ async def Generate_Critique_mistral(data):
                         )
                         
                         http_response.raise_for_status()
-
-                       
-            
+                        
         except Exception as e:
                     return e
         
