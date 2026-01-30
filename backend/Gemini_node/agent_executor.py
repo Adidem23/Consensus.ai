@@ -1,3 +1,4 @@
+import json
 from a2a.server.agent_execution import AgentExecutor , RequestContext
 from a2a.server.events import EventQueue
 from a2a.types import (
@@ -9,15 +10,26 @@ from a2a.types import (
 from a2a.utils import new_text_artifact
 from agent.agent import GeminiNodeAgent
 
+
 class GeminiNodeAgentExecutor(AgentExecutor):
     def __init__(self):
         self.agent=GeminiNodeAgent()
     
     async def execute(self,context:RequestContext,event_queue:EventQueue):
 
-        user_query=context.get_user_input()
+        raw_input = context.get_user_input()
 
-        final_response=await self.agent.generateNormalResponse(user_query)
+        try:
+            parsed_input = json.loads(raw_input)
+        except (TypeError, json.JSONDecodeError):
+            parsed_input = raw_input
+
+        if isinstance(parsed_input, dict):
+            final_response = await self.agent.generate_gemini_critique(parsed_input)
+
+        elif isinstance(parsed_input, str):
+            final_response = await self.agent.generateNormalResponse(parsed_input)
+
 
         await event_queue.enqueue_event(
             TaskArtifactUpdateEvent(

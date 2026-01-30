@@ -8,6 +8,7 @@ from langgraph.graph import START , StateGraph , END
 from langchain.messages import AnyMessage ,HumanMessage
 from typing_extensions import Annotated , TypedDict
 from langgraph.types import Command
+from client_class import Agent_Client_Class_Dict_Input
 
 load_dotenv()
 
@@ -17,9 +18,12 @@ MISTRAL_API_KEY=os.getenv("MISTRAL_API_KEY","")
 class AgentState(TypedDict):
     user_msgs:Annotated[list[AnyMessage],operator.add]
     query: str | None
+    dataobj:dict | None
     llm_count:int
 
-async def Generate_Critique_mistral(data):
+async def Generate_Critique_mistral(state:AgentState):
+        
+        data=state['dataobj']
         
         client = Mistral(api_key=MISTRAL_API_KEY)
 
@@ -95,34 +99,12 @@ async def Generate_Critique_mistral(data):
                         )
                         
                         http_response.raise_for_status()
+                         
+                        return completion.choices[0].message.content
                         
         except Exception as e:
                     return e
-        
-async def startDebate(CA_Query):
-        MAX_RETRIES = 10  
-        POLL_INTERVAL = 2
 
-        async with httpx.AsyncClient(timeout=60) as client:
-
-            for attempt in range(MAX_RETRIES):
-
-                http_response = await client.post(
-                    "http://localhost:8500/agentquery/searchForOtherRecords",
-                    json=CA_Query
-                )
-
-                if http_response.status_code != 200:
-                    return
-
-                records = http_response.json()
-
-                if records:
-                    for record in records:
-                        await Generate_Critique_mistral(record)
-                    return 
-
-                await asyncio.sleep(POLL_INTERVAL)
 
 async def normal_response_call(state:AgentState):
     client = Mistral(api_key=MISTRAL_API_KEY)
@@ -156,32 +138,36 @@ async def normal_response_call(state:AgentState):
                             json=CA_Query
                         )
             response.raise_for_status()
+  
+            new_client=Agent_Client_Class_Dict_Input()
 
-            await startDebate(CA_Query)
+            GEMINI_NODE_URL="http://localhost:8005"
 
+            response = await new_client.create_connection(GEMINI_NODE_URL,CA_Query)
+            
             return Command(
          update={"user_msgs":state['user_msgs']+[chat_response],"llm_count":state.get('llm_count',0)+1},goto=END
-    )
+        )
 
     except Exception as e:
                     return e
 
     
 
-
 builder=StateGraph(AgentState)
 
 builder.add_node("normal_response_call",normal_response_call)
+builder.add_node("Generate_Critique_mistral",Generate_Critique_mistral)
 
 builder.add_edge(START,"normal_response_call")
 
 mistral_agent=builder.compile()
 
-async def runagent():
-      user_input=input('Enter : ')
-      messages = [HumanMessage(content=user_input)]
-      messages =await mistral_agent.ainvoke({"messages": messages,"query":user_input})
-      print(messages)
+# async def runagent():
+#       user_input=input('Enter : ')
+#       messages = [HumanMessage(content=user_input)]
+#       messages =await mistral_agent.ainvoke({"messages": messages,"query":user_input})
+#       print(messages)
 
-if __name__=="__main__":
-      asyncio.run(runagent())
+# if __name__=="__main__":
+#       asyncio.run(runagent())

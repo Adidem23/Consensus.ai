@@ -4,7 +4,7 @@ from google.adk.runners import Runner
 from dotenv import load_dotenv
 from google.genai import types
 import httpx
-import asyncio
+from client_class import Agent_Client_Class_Dict_Input
 
 load_dotenv()
 
@@ -126,37 +126,13 @@ Output format:
                             json=Update_data_Critique
                         )
                         http_response.raise_for_status()
+                        
                         return event.content.parts[0].text
                     
                 except Exception as e:
                     return e
 
         
-
-    async def startDebate(self, CA_Query):
-        MAX_RETRIES = 20  
-        POLL_INTERVAL = 2
-
-        async with httpx.AsyncClient(timeout=60) as client:
-
-            for attempt in range(MAX_RETRIES):
-
-                http_response = await client.post(
-                    "http://localhost:8500/agentquery/searchForOtherRecords",
-                    json=CA_Query
-                )
-
-                if http_response.status_code != 200:
-                    return
-
-                records = http_response.json()
-
-                if records:
-                    for record in records:
-                        await self.generate_gemini_critique(record)
-                    return 
-
-                await asyncio.sleep(POLL_INTERVAL)
 
     async def generateNormalResponse(self,user_query:str | None):
         session_Service=InMemorySessionService()
@@ -194,14 +170,20 @@ Output format:
                 }
 
                 try:
+
                     async with httpx.AsyncClient(timeout=60) as client:
                         response = await client.post(
                             "http://localhost:8500/agentquery/uploadRecord",
                             json=CA_Query
                         )
+                        
                         response.raise_for_status()
+                    
+                    new_client=Agent_Client_Class_Dict_Input()
 
-                    await self.startDebate(CA_Query)
+                    MISTRAL_NODE_BASE_URL="http://localhost:8006"
 
+                    response = await new_client.create_connection(MISTRAL_NODE_BASE_URL,CA_Query)
+  
                 except Exception as e:
                     return e

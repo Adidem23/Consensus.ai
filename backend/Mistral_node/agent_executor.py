@@ -1,3 +1,4 @@
+import json
 from a2a.server.agent_execution import AgentExecutor, RequestContext 
 from a2a.server.events import EventQueue
 from a2a.types import (
@@ -15,12 +16,41 @@ class MistralNodeAgentExecutor(AgentExecutor):
     
     async def execute(self, context:RequestContext, event_queue:EventQueue):
         
-        user_query= context.get_user_input()
-        
-        messages=[HumanMessage(content=f'{user_query}')]
+        raw_input = context.get_user_input()
 
-        result= await mistral_agent.ainvoke({"messages":messages,"query":user_query})
-        print(result)
+        try:
+            parsed_input = json.loads(raw_input)
+        except (TypeError, json.JSONDecodeError):
+            parsed_input = raw_input
+
+        if isinstance(parsed_input, dict):
+            
+            user_query = parsed_input["query"]
+
+            messages = [
+                HumanMessage(
+                    content=f"User Query:\n{user_query}"
+                )
+            ]
+
+            result = await mistral_agent.ainvoke({
+                "messages": messages,
+                "dataobj":parsed_input,
+                "query": user_query  
+            })
+
+        elif isinstance(parsed_input, str):
+            user_query = parsed_input
+
+            messages = [
+                HumanMessage(content=user_query)
+            ]
+
+            result = await mistral_agent.ainvoke({
+                "messages": messages,
+                "query": user_query
+            })
+
 
         await event_queue.enqueue_event(
             TaskArtifactUpdateEvent(
