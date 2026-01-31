@@ -106,6 +106,6 @@ Your goal is safety, reliability, and correctness — not creativity.
     async def delegateTasks(self, BASE_AGENT_URL:str|None , user_input:str|None):
         new_client=Agent_Client_Class()
 
-        response=await new_client.create_connection(BASE_AGENT_URL,user_input)
+        response= await new_client.create_connection(BASE_AGENT_URL,user_input)
 
         return response    

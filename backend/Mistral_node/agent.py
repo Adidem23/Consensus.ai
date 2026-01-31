@@ -19,8 +19,75 @@ class AgentState(TypedDict):
     user_msgs:Annotated[list[AnyMessage],operator.add]
     query: str | None
     dataobj:dict | None
+    callNode: str | None
     llm_count:int
 
+
+async def CreateFinalAnswer():
+       
+       async with httpx.AsyncClient(timeout=60) as client:
+                    
+                search_data_load={
+                           "Agent_Node_name":"Mistral",
+                            "query":"",
+                            "Agent_first_Output": "",
+                            "final_output":"",
+                            "Critiques":[]
+                }
+
+                response = await client.post(
+                        "http://localhost:8500/agentquery/searchForOtherRecords",
+                        json=search_data_load
+                    )
+                response.raise_for_status()
+
+                records = response.json()  
+        
+                record=records[0]
+
+
+                final_answer_prompt=f"""
+        Generate the updated response for the query: {record['query']} considering the critiques: {record['Critiques'][0]['Critique']}
+
+
+        """
+                Mistral_client = Mistral(api_key=MISTRAL_API_KEY)
+                
+                model="mistral-medium-latest"
+                    
+                completion= Mistral_client.chat.complete(
+                    model = model,
+                    messages = [
+                        {
+                            "role":"system",
+                            "content":final_answer_prompt
+                        },
+                        {
+                            "role": "user",
+                            "content": f"generate the final output from the query:{record['query']} considering critique :{record['Critiques'][0]['Critique']}",
+                        },
+                    ]
+                    )
+                
+                update_payload={
+                    "Agent_Node_name":record['Agent_Node_name'],
+                    "query":"",
+                    "Agent_first_Output": "",
+                    "final_output":completion.choices[0].message.content,
+                    "Critiques":[]
+                    }
+                
+
+                update_resp = await client.post(
+                                    "http://localhost:8500/agentquery/updateFinalOutput",
+                                    json=update_payload
+                                )
+                        
+                update_resp.raise_for_status()
+
+                return completion.choices[0].message.content
+                   
+       
 async def Generate_Critique_mistral(state:AgentState):
         
         data=state['dataobj']
@@ -63,7 +130,7 @@ async def Generate_Critique_mistral(state:AgentState):
 
 """
        
-        completion=client.chat.complete(
+        completion= client.chat.complete(
         model = model,
         messages = [
             {
@@ -99,8 +166,12 @@ async def Generate_Critique_mistral(state:AgentState):
                         )
                         
                         http_response.raise_for_status()
+
+                        await CreateFinalAnswer()
                          
-                        return completion.choices[0].message.content
+                        return Command(
+                               update={"llm_count":state.get('llm_count',0)+1}
+                        )
                         
         except Exception as e:
                     return e
@@ -145,28 +216,44 @@ async def normal_response_call(state:AgentState):
 
             response = await new_client.create_connection(GEMINI_NODE_URL,CA_Query)
             
-            return Command(
-         update={"user_msgs":state['user_msgs']+[chat_response],"llm_count":state.get('llm_count',0)+1},goto=END
-        )
-
     except Exception as e:
                     return e
+    
+
+    return Command(
+         update={"user_msgs":state['user_msgs'],"llm_count":state.get('llm_count',0)+1},goto=END
+    )
 
     
+
+
+async def startNode(state:AgentState):
+        if(state['callNode']=="Normal"):
+           return Command(
+            update={"user_msgs":state['user_msgs'],"llm_count":state.get('llm_count',0)+1},goto="normal_response_call"
+            )
+
+        elif(state['callNode']=="Debate"):
+            return Command(
+            update={"user_msgs":state['user_msgs'],"llm_count":state.get('llm_count',0)+1},goto="Generate_Critique_mistral"
+            )
+               
+                    
 
 builder=StateGraph(AgentState)
 
 builder.add_node("normal_response_call",normal_response_call)
 builder.add_node("Generate_Critique_mistral",Generate_Critique_mistral)
+builder.add_node("startNode",startNode)
 
-builder.add_edge(START,"normal_response_call")
+builder.add_edge(START,"startNode")
 
 mistral_agent=builder.compile()
 
 # async def runagent():
 #       user_input=input('Enter : ')
 #       messages = [HumanMessage(content=user_input)]
-#       messages =await mistral_agent.ainvoke({"messages": messages,"query":user_input})
+#       messages =await mistral_agent.ainvoke({"messages": messages,"query":user_input,"callNode":"Normal"})
 #       print(messages)
 
 # if __name__=="__main__":

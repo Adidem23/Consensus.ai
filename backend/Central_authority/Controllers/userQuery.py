@@ -62,3 +62,21 @@ async def updateCritiques(agentQuery: AgentQueryObject):
         )
 
     return {"message": "Critiques updated successfully"}
+
+@router.post("/updateFinalOutput")
+async def updateFinalOutput(agentQuery: AgentQueryObject):
+    lock = agent_locks[agentQuery.Agent_Node_name]
+
+    async with lock:
+        await update_document(
+            {"Agent_Node_name": agentQuery.Agent_Node_name},
+            {
+                "$set": {
+                    "final_output": agentQuery.final_output
+                }
+            }
+        )
+
+    return {
+        "message": f"Final output updated for {agentQuery.Agent_Node_name}"
+    }

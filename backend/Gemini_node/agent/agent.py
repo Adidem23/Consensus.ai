@@ -1,9 +1,10 @@
+import httpx
+import asyncio
 from google.adk.agents import Agent
 from google.adk.sessions import InMemorySessionService
 from google.adk.runners import Runner
 from dotenv import load_dotenv
 from google.genai import types
-import httpx
 from client_class import Agent_Client_Class_Dict_Input
 
 load_dotenv()
@@ -80,6 +81,84 @@ Output format:
 """)
         )
 
+
+    async def genearateFinalAnswer(self):
+
+       async with httpx.AsyncClient(timeout=60) as client:
+
+            search_data_load={
+                           "Agent_Node_name":"Gemini",
+                            "query":"",
+                            "Agent_first_Output": "",
+                            "final_output":"",
+                            "Critiques":[]
+                }
+
+            response = await client.post(
+                        "http://localhost:8500/agentquery/searchForOtherRecords",
+                        json=search_data_load
+                    )
+            response.raise_for_status()
+
+            records = response.json()  
+
+            record=records[0]
+
+            session_service = InMemorySessionService()
+
+            await session_service.create_session(
+                        app_name="Gemini_Final_Answer_Agent",
+                        session_id="session1",
+                        user_id="user1"
+                    )
+
+            user_msg = types.Content(
+                        role="user",
+                        parts=[
+                            types.Part(
+                                text=(
+                                    f"Generate the updated response for the query: "
+                                    f"{record['query']} "
+                                    f"considering the critiques: "
+                                    f"{record['Critiques'][0]['Critique']}"
+                                )
+                            )
+                        ]
+                    )
+
+            runner = Runner(
+                        app_name="Gemini_Final_Answer_Agent",
+                        agent=self.agent,
+                        session_service=session_service
+                    )
+
+            async for event in runner.run_async(
+                        user_id="user1",
+                        session_id="session1",
+                        new_message=user_msg
+                    ):
+                        if event.is_final_response():
+                            
+                            final_text = event.content.parts[0].text
+
+                            update_payload={
+                                "Agent_Node_name":record['Agent_Node_name'],
+                                "query":"",
+                                "Agent_first_Output": "",
+                                "final_output":final_text,
+                                "Critiques":[]
+                            }
+
+                            update_resp = await client.post(
+                                    "http://localhost:8500/agentquery/updateFinalOutput",
+                                    json=update_payload
+                                )
+
+
+                            update_resp.raise_for_status()
+
+                            return final_text
+
     
     async def generate_gemini_critique(self,data:dict):
         
@@ -118,7 +197,7 @@ Output format:
                             "Critiques":[{
                                 "Given_By_Agent":"Gemini_Agent",
                                 "Given_To_Agent":data['Agent_Node_name'],
-                                "Critique": event.content.parts[0].text
+                                "Critique": str(event.content.parts[0].text)
                             }]
                         }
                         http_response  = await client.post(
@@ -126,8 +205,10 @@ Output format:
                             json=Update_data_Critique
                         )
                         http_response.raise_for_status()
-                        
-                        return event.content.parts[0].text
+
+                        response= await self.genearateFinalAnswer()
+
+                        return response
                     
                 except Exception as e:
                     return e
@@ -184,6 +265,6 @@ Output format:
                     MISTRAL_NODE_BASE_URL="http://localhost:8006"
 
                     response = await new_client.create_connection(MISTRAL_NODE_BASE_URL,CA_Query)
-  
+
                 except Exception as e:
                     return e

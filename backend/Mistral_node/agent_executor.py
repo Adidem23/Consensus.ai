@@ -36,6 +36,7 @@ class MistralNodeAgentExecutor(AgentExecutor):
             result = await mistral_agent.ainvoke({
                 "messages": messages,
                 "dataobj":parsed_input,
+                "callNode":"Debate",
                 "query": user_query  
             })
 
@@ -48,9 +49,9 @@ class MistralNodeAgentExecutor(AgentExecutor):
 
             result = await mistral_agent.ainvoke({
                 "messages": messages,
+                "callNode":"Normal",
                 "query": user_query
             })
-
 
         await event_queue.enqueue_event(
             TaskArtifactUpdateEvent(

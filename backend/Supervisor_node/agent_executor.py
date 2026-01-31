@@ -23,6 +23,7 @@ class SupervisorAgentExecutor(AgentExecutor):
         response1=await self.agent.delegateTasks(GEMINI_NODE_AGENT_URL,user_query)
         response2=await self.agent.delegateTasks(MISTRAL_NODE_AGENT_URL,user_query)
 
+
         # final_response=await self.agent.giveFinalAnswer(response1,response2)
 
         await event_queue.enqueue_event(
