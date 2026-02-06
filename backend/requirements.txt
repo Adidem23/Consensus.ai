@@ -13,3 +13,4 @@ motor
 httpx
 mistralai
 langchain
+opik

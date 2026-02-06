@@ -1,13 +1,20 @@
 import httpx
 import asyncio
+import opik
 from google.adk.agents import Agent
 from google.adk.sessions import InMemorySessionService
 from google.adk.runners import Runner
 from dotenv import load_dotenv
 from google.genai import types
 from client_class import Agent_Client_Class_Dict_Input
+from opik import Opik , track
+
 
 load_dotenv()
+
+opik.configure()
+
+Opik_client=Opik()
 
 class GeminiNodeAgent:
 
@@ -80,7 +87,7 @@ Output format:
 
 """)
         )
-
+    
 
     async def genearateFinalAnswer(self):
 
@@ -141,6 +148,20 @@ Output format:
                             
                             final_text = event.content.parts[0].text
 
+                            final_answer_trace=Opik_client.trace(
+                            name="gemini_final_response",
+                            input={"question": record['query']},
+                            output={"response":str(event.content.parts[0].text)},
+                            tags=["gemini", "chat", "llm_debate_agent"],
+                            metadata={
+                                "provider": "gemini",
+                                "model": "gemini-2.5-flash",
+                                "env": "local"
+                            }
+                            )
+
+                            final_answer_trace.end()
+
                             update_payload={
                                 "Agent_Node_name":record['Agent_Node_name'],
                                 "query":"",
@@ -159,7 +180,7 @@ Output format:
 
                             return final_text
 
-    
+
     async def generate_gemini_critique(self,data:dict):
         
         session_Service=InMemorySessionService()
@@ -206,6 +227,22 @@ Output format:
                         )
                         http_response.raise_for_status()
 
+                        crtique_text_input=f"Criticize this output {data['Agent_first_Output']}produced by other agent for the query {data['query']} with provided instructions"
+
+                        critique_answer_trace=Opik_client.trace(
+                        name="gemini_critique_response",
+                        input={"question": crtique_text_input},
+                        output={"response":str(event.content.parts[0].text)},
+                        tags=["gemini", "chat", "llm_debate_agent"],
+                        metadata={
+                            "provider": "gemini",
+                            "model": "gemini-2.5-flash",
+                            "env": "local"
+                        }
+                        )
+
+                        critique_answer_trace.end()
+
                         response= await self.genearateFinalAnswer()
 
                         return response
@@ -213,7 +250,7 @@ Output format:
                 except Exception as e:
                     return e
 
-        
+    
 
     async def generateNormalResponse(self,user_query:str | None):
         session_Service=InMemorySessionService()
@@ -249,6 +286,20 @@ Output format:
                     "final_output":"",
                     "Critiques":[]
                 }
+
+                normal_answer_trace=Opik_client.trace(
+                        name="gemini_normal_response",
+                        input={"question": user_query},
+                        output={"response":str(event.content.parts[0].text)},
+                        tags=["gemini", "chat", "llm_debate_agent"],
+                        metadata={
+                            "provider": "gemini",
+                            "model": "gemini-2.5-flash",
+                            "env": "local"
+                        }
+                )
+
+                normal_answer_trace.end()
 
                 try:
 

@@ -102,6 +102,9 @@ Your goal is safety, reliability, and correctness — not creativity.
         ):
             if event.is_final_response():
                 return event.content.parts[0].text
+            
+    async def giveDummyFinalResponse(self):
+        return {"msg":"All vitals Good as Hell"}
 
     async def delegateTasks(self, BASE_AGENT_URL:str|None , user_input:str|None):
         new_client=Agent_Client_Class()

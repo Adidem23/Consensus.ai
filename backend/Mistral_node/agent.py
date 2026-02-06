@@ -2,6 +2,7 @@ import operator
 import os
 import httpx
 import asyncio
+import opik
 from dotenv import load_dotenv
 from mistralai import Mistral
 from langgraph.graph import START , StateGraph , END
@@ -9,11 +10,15 @@ from langchain.messages import AnyMessage ,HumanMessage
 from typing_extensions import Annotated , TypedDict
 from langgraph.types import Command
 from client_class import Agent_Client_Class_Dict_Input
+from opik import Opik 
 
 load_dotenv()
 
 MISTRAL_API_KEY=os.getenv("MISTRAL_API_KEY","")
 
+opik.configure()
+
+Opik_client=Opik()
 
 class AgentState(TypedDict):
     user_msgs:Annotated[list[AnyMessage],operator.add]
@@ -44,7 +49,6 @@ async def CreateFinalAnswer():
                 records = response.json()  
         
                 record=records[0]
-
 
                 final_answer_prompt=f"""
         Generate the updated response for the query: {record['query']} considering the critiques: {record['Critiques'][0]['Critique']}
@@ -85,9 +89,23 @@ async def CreateFinalAnswer():
                         
                 update_resp.raise_for_status()
 
+                final_answer_trace = Opik_client.trace(
+                    name="mistral_final_response",
+                    input={"question": record['query']},
+                    output={"response":completion.choices[0].message.content},
+                    tags=["mistral", "chat", "llm_debate_agent"],
+                    metadata={
+                        "provider": "mistral",
+                        "model": model,
+                        "env": "local"
+                    }
+                )
+
+                final_answer_trace.end()
+
                 return completion.choices[0].message.content
                    
-       
+    
 async def Generate_Critique_mistral(state:AgentState):
         
         data=state['dataobj']
@@ -167,6 +185,22 @@ async def Generate_Critique_mistral(state:AgentState):
                         
                         http_response.raise_for_status()
 
+                        critique_input=f"give me the critique with instruction provided for {data['Agent_first_Output']}"
+
+                        critique_answer_trace=Opik_client.trace(
+                        name="mistral_critique_response",
+                        input={"question": critique_input},
+                        output={"response":critique_text},
+                        tags=["mistral", "chat", "llm_debate_agent"],
+                        metadata={
+                            "provider": "mistral",
+                            "model": model,
+                            "env": "local"
+                        }
+                        )
+
+                        critique_answer_trace.end()
+
                         await CreateFinalAnswer()
                          
                         return Command(
@@ -175,6 +209,9 @@ async def Generate_Critique_mistral(state:AgentState):
                         
         except Exception as e:
                     return e
+
+
+
 
 
 async def normal_response_call(state:AgentState):
@@ -211,6 +248,20 @@ async def normal_response_call(state:AgentState):
             response.raise_for_status()
   
             new_client=Agent_Client_Class_Dict_Input()
+
+            normal_answer_trace=Opik_client.trace(
+                        name="mistral_normal_response",
+                        input={"question": state['query']},
+                        output={"response":final_reponse},
+                        tags=["mistral", "chat", "llm_debate_agent"],
+                        metadata={
+                            "provider": "mistral",
+                            "model": model,
+                            "env": "local"
+                        }
+            )
+                        
+            normal_answer_trace.end()
 
             GEMINI_NODE_URL="http://localhost:8005"
 

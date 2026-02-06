@@ -22,9 +22,9 @@ class SupervisorAgentExecutor(AgentExecutor):
 
         response1=await self.agent.delegateTasks(GEMINI_NODE_AGENT_URL,user_query)
         response2=await self.agent.delegateTasks(MISTRAL_NODE_AGENT_URL,user_query)
-
-
-        # final_response=await self.agent.giveFinalAnswer(response1,response2)
+ 
+        if(response1 and  response2):
+            final_response=await self.agent.giveDummyFinalResponse()
 
         await event_queue.enqueue_event(
             TaskArtifactUpdateEvent(
@@ -32,7 +32,7 @@ class SupervisorAgentExecutor(AgentExecutor):
                 task_id=context.task_id,
                 artifact=new_text_artifact(
                     "final_answer",
-                    str(response1)+str(response2)
+                    str(final_response)
                 ),
             )
         )
