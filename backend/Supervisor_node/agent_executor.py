@@ -24,7 +24,7 @@ class SupervisorAgentExecutor(AgentExecutor):
         response2=await self.agent.delegateTasks(MISTRAL_NODE_AGENT_URL,user_query)
  
         if(response1 and  response2):
-            final_response=await self.agent.giveDummyFinalResponse()
+            final_response=await self.agent.giveDummyFinalResponse(user_query)
 
         await event_queue.enqueue_event(
             TaskArtifactUpdateEvent(
