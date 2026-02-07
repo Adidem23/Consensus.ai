@@ -89,13 +89,13 @@ Output format:
         )
     
 
-    async def genearateFinalAnswer(self):
+    async def genearateFinalAnswer(self,query):
 
        async with httpx.AsyncClient(timeout=60) as client:
 
             search_data_load={
                            "Agent_Node_name":"Gemini",
-                            "query":"",
+                            "query":query,
                             "Agent_first_Output": "",
                             "final_output":"",
                             "Critiques":[]
@@ -164,7 +164,7 @@ Output format:
 
                             update_payload={
                                 "Agent_Node_name":record['Agent_Node_name'],
-                                "query":"",
+                                "query":record['query'],
                                 "Agent_first_Output": "",
                                 "final_output":final_text,
                                 "Critiques":[]
@@ -243,7 +243,7 @@ Output format:
 
                         critique_answer_trace.end()
 
-                        response= await self.genearateFinalAnswer()
+                        response= await self.genearateFinalAnswer(data['query'])
 
                         return response
                     

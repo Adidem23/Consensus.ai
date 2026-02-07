@@ -28,13 +28,13 @@ class AgentState(TypedDict):
     llm_count:int
 
 
-async def CreateFinalAnswer():
+async def CreateFinalAnswer(query):
        
        async with httpx.AsyncClient(timeout=60) as client:
                     
                 search_data_load={
                            "Agent_Node_name":"Mistral",
-                            "query":"",
+                            "query":query,
                             "Agent_first_Output": "",
                             "final_output":"",
                             "Critiques":[]
@@ -75,7 +75,7 @@ async def CreateFinalAnswer():
                 
                 update_payload={
                     "Agent_Node_name":record['Agent_Node_name'],
-                    "query":"",
+                    "query":query,
                     "Agent_first_Output": "",
                     "final_output":completion.choices[0].message.content,
                     "Critiques":[]
@@ -201,7 +201,7 @@ async def Generate_Critique_mistral(state:AgentState):
 
                         critique_answer_trace.end()
 
-                        await CreateFinalAnswer()
+                        await CreateFinalAnswer(data['query'])
                          
                         return Command(
                                update={"llm_count":state.get('llm_count',0)+1}
@@ -209,9 +209,6 @@ async def Generate_Critique_mistral(state:AgentState):
                         
         except Exception as e:
                     return e
-
-
-
 
 
 async def normal_response_call(state:AgentState):

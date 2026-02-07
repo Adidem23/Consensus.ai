@@ -118,7 +118,8 @@ Your goal is safety, reliability, and correctness — not creativity.
             # Initialize Opik client
             opik_client = opik.Opik()
 
-            filter_query = 'name contains "final_response"'
+            filter_query = f'name contains "final_response"'
+
             
             # Search traces with two filters
             traces = opik_client.search_traces(

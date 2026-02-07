@@ -31,7 +31,8 @@ async def searchOtherModelRecords(agentQuery: AgentQueryObject):
 
     async with lock:
         records = await read_all_documents({
-            "Agent_Node_name": {"$ne": agentQuery.Agent_Node_name}
+            "Agent_Node_name": {"$ne": agentQuery.Agent_Node_name},
+            "query":agentQuery.query
         })
 
         for record in records:
@@ -51,7 +52,8 @@ async def updateCritiques(agentQuery: AgentQueryObject):
         ]
 
         await update_document(
-            {"Agent_Node_name": agentQuery.Agent_Node_name},
+            {"Agent_Node_name": agentQuery.Agent_Node_name,
+             "query":agentQuery.query},
             {
                 "$push": {
                     "Critiques": {
@@ -69,7 +71,7 @@ async def updateFinalOutput(agentQuery: AgentQueryObject):
 
     async with lock:
         await update_document(
-            {"Agent_Node_name": agentQuery.Agent_Node_name},
+            {"Agent_Node_name": agentQuery.Agent_Node_name,"query":agentQuery.query},
             {
                 "$set": {
                     "final_output": agentQuery.final_output
