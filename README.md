@@ -37,12 +37,13 @@ This approach improves:
 
 ### 📐 Architecture Overview
 
-The system is designed as a graph-based multi-agent workflow where each agent has a well-defined role and execution boundary.
+The system is designed as council of Different LLM nodes where they critique each others output and one supervisor Node handles LLM responses and gives most relevant output 
 
 **Key components:**
-- **Pro Agent** – argues in favor of the claim
-- **Con Agent** – argues against the claim
-- **Judge Agent** – evaluates arguments and produces the final verdict
+- **Supervisor Agent** – Delegates user query to all nodes in LLM Debate and Gathers final output of all and returns most realiable output
+- **LLM Nodes** – They Critique with each other enhances their output and then send final Answer to Supervisor Ndoe 
+- **Central Autority** – This is central which knows which LLM has given answer which has given a critique . In brief it is LLM Debate State Manager 
+- **Opik**- All LLM calls are being traced to comet opik 
 
 <img width="1916" height="767" alt="Architecture Diagram" src="https://github.com/user-attachments/assets/6f148b1f-abd8-49fa-8f24-428fdf662a88" />
 
@@ -52,10 +53,10 @@ The system is designed as a graph-based multi-agent workflow where each agent ha
 The debate follows a structured, step-by-step flow:
 
 1. User submits a question or claim  
-2. Pro and Con agents generate independent arguments  
-3. (Optional) Multi-round rebuttals enhance depth  
-4. Judge agent evaluates arguments on quality and relevance  
-5. Final verdict and scores are returned to the user  
+2. Supervisor delegates it to all llm nodes in Council 
+3. LLM nodes generates one final output at their end 
+4. LLM nodes sends the output to supervisor Node 
+5. Supervisor Checks the most reelevant answer and returns Back to user  
 
 <img width="4000" height="1000" alt="Flow Chart" src="https://github.com/user-attachments/assets/9009a5a1-dcba-4b89-a00f-2b8ccf4a0404" />
 
@@ -77,4 +78,7 @@ Unlike traditional single-response LLM systems, the **LLM Debate Agent**:
 - Provides evaluative confidence instead of blind trust
 
 This makes it suitable for **decision support**, **education**, and **LLM evaluation workflows**.
+
+
+## Tech Stack 
 
