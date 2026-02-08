@@ -2,6 +2,7 @@
 
 > A multi-agent reasoning system that debates complex questions, evaluates arguments, and produces more reliable, explainable AI outputs.
 
+
 ## 📌 Problem Statement
 
 Large Language Models (LLMs) often:
@@ -11,24 +12,69 @@ Large Language Models (LLMs) often:
 - Lack transparent evaluation of their own responses
 
 For decision-making, learning, and analysis, a single LLM response is not enough.  
-Users need balanced reasoning, counter-arguments, and measurable confidence.
-
-## 💡Solution
-
-The **LLM Debate Agent** is a **multi-agent architecture** where multiple LLMs debate a topic from opposing perspectives, followed by an independent evaluation agent that scores and synthesizes the final answer.
-
-Instead of asking *“What is the answer?”*, we ask:
-
-> “What are the strongest arguments **for**, **against**, and which one actually holds up?”
+Users need **balanced reasoning**, **counter-arguments**, and **measurable confidence**.
 
 
+## 💡 Proposed Solution
 
-## Architectural Summary Video : https://youtu.be/YYz59eWWCT0
+The **LLM Debate Agent** introduces a **multi-agent debate architecture** where multiple LLMs independently reason from opposing perspectives, followed by an unbiased evaluation agent.
 
-## Youtube Video : https://youtu.be/-n4D94Ny4ek?si=sbvnMG049G9L5ke2
+Instead of asking:
 
-## Architecture Diagram : 
-<img width="1916" height="767" alt="Screenshot 2026-02-07 170717" src="https://github.com/user-attachments/assets/6f148b1f-abd8-49fa-8f24-428fdf662a88" />
+> *“What is the answer?”*
 
-## Flow Chart : 
-<img width="4000" height="1000" alt="image" src="https://github.com/user-attachments/assets/9009a5a1-dcba-4b89-a00f-2b8ccf4a0404" />
+We ask:
+
+> **“What are the strongest arguments for and against this claim, and which one stands up to scrutiny?”**
+
+This approach improves:
+- Answer reliability
+- Reasoning transparency
+- Trustworthiness of LLM outputs
+
+
+## 🏗️ System Architecture
+
+### 📐 Architecture Overview
+
+The system is designed as a graph-based multi-agent workflow where each agent has a well-defined role and execution boundary.
+
+**Key components:**
+- **Pro Agent** – argues in favor of the claim
+- **Con Agent** – argues against the claim
+- **Judge Agent** – evaluates arguments and produces the final verdict
+
+<img width="1916" height="767" alt="Architecture Diagram" src="https://github.com/user-attachments/assets/6f148b1f-abd8-49fa-8f24-428fdf662a88" />
+
+
+### 🔁 Execution Flow
+
+The debate follows a structured, step-by-step flow:
+
+1. User submits a question or claim  
+2. Pro and Con agents generate independent arguments  
+3. (Optional) Multi-round rebuttals enhance depth  
+4. Judge agent evaluates arguments on quality and relevance  
+5. Final verdict and scores are returned to the user  
+
+<img width="4000" height="1000" alt="Flow Chart" src="https://github.com/user-attachments/assets/9009a5a1-dcba-4b89-a00f-2b8ccf4a0404" />
+
+
+## 🎥 Project Walkthrough & Demo
+
+- **Architecture Summary Video**  
+  👉 https://youtu.be/YYz59eWWCT0
+
+- **End-to-End Demo Video**  
+  👉 https://youtu.be/-n4D94Ny4ek?si=sbvnMG049G9L5ke2
+
+
+## 🚀 Why This Matters
+
+Unlike traditional single-response LLM systems, the **LLM Debate Agent**:
+- Makes disagreement explicit
+- Encourages deeper reasoning
+- Provides evaluative confidence instead of blind trust
+
+This makes it suitable for **decision support**, **education**, and **LLM evaluation workflows**.
+
