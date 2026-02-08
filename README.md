@@ -2,8 +2,6 @@
 
 > A multi-agent reasoning system that debates complex questions, evaluates arguments, and produces more reliable, explainable AI outputs.
 
-------
-
 ## 📌 Problem Statement
 
 Large Language Models (LLMs) often:
@@ -14,8 +12,6 @@ Large Language Models (LLMs) often:
 
 For decision-making, learning, and analysis, a single LLM response is not enough.  
 Users need balanced reasoning, counter-arguments, and measurable confidence.
-
------
 
 ## 💡Solution
 
