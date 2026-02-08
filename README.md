@@ -80,18 +80,57 @@ Unlike traditional single-response LLM systems, the **LLM Debate Agent**:
 This makes it suitable for **decision support**, **education**, and **LLM evaluation workflows**.
 
 
-## Tech Stack 👩🏾‍💻
-## 🛠️ Tech Stack
+## 🤖 Tech Stack Used
 
-<p align="left">
-  <img src="https://raw.githubusercontent.com/langchain-ai/langgraph/main/docs/static/img/langgraph_logo.png" alt="LangGraph" height="50"/>
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" height="50"/>
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/openai/openai-original.svg" alt="OpenAI" height="50"/>
-  <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/mistralai.svg" alt="Mistral" height="50"/>
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original.svg" alt="Docker" height="50"/>
-</p>
+<table>
+  <tr>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/175ee65f-1a64-4db1-9b00-1f65755bfed6" height="45"/><br/>
+      <b>NextJs</b>
+    </td>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" height="45"/><br/>
+      <b>Python</b>
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/f2f4f0fb-0619-41f0-b0fd-cfadd644fd2b" height="45"/><br/>
+      <b>FastApi</b>
+    </td>
+     <td align="center">
+      <img src="https://github.com/user-attachments/assets/77bb4677-ec84-43de-9123-ee45d1fdeb32" height="45"/><br/>
+      <b>Pydantic</b>
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/e2ea7528-ba0c-4ff4-b6fb-b52412838634" height="45"/><br/>
+      <b>MongoDB</b>
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/c5cefdaf-22ce-4479-b585-3eb60f76eb93" height="45"/><br/>
+      <b>Gemini</b>
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/3be09b6f-42fc-4891-a2af-b0c7af519d86" height="45"/><br/>
+      <b>Mistral</b>
+    </td>
+     <td align="center">
+      <img src="https://github.com/user-attachments/assets/49a38bf5-adf5-43a5-b28a-6d647a8b9bec" height="45"/><br/>
+      <b>Google ADK</b>
+    </td>
+     <td align="center">
+      <img src="https://github.com/user-attachments/assets/1b48577c-4991-47a1-ab09-9c3d43fb31f9" height="45"/><br/>
+      <b>LangGraph</b>
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/23843af5-13ad-4489-b130-6ac67ed35640" height="45"/><br/>
+      <b>A2A Protocol</b>
+    </td>
+     <td align="center">
+      <img src="https://github.com/user-attachments/assets/8cc17a1c-f338-4e25-878c-2d5767c6ff45" height="45"/><br/>
+      <b>Comet Opik</b>
+    </td>
+  </tr>
+</table>
 
-**LangGraph · Python · OpenAI · Mistral · Docker**
 
 
 
