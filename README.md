@@ -80,5 +80,18 @@ Unlike traditional single-response LLM systems, the **LLM Debate Agent**:
 This makes it suitable for **decision support**, **education**, and **LLM evaluation workflows**.
 
 
-## Tech Stack 
+## Tech Stack 👩🏾‍💻
+## 🛠️ Tech Stack
+
+<p align="left">
+  <img src="https://raw.githubusercontent.com/langchain-ai/langgraph/main/docs/static/img/langgraph_logo.png" alt="LangGraph" height="50"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" height="50"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/openai/openai-original.svg" alt="OpenAI" height="50"/>
+  <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/mistralai.svg" alt="Mistral" height="50"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original.svg" alt="Docker" height="50"/>
+</p>
+
+**LangGraph · Python · OpenAI · Mistral · Docker**
+
+
 
