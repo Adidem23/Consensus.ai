@@ -1,4 +1,4 @@
-# 🧠 LLM Debate Agent
+# 🧠 Consensus.ai
 
 > A multi-agent reasoning system that debates complex questions, evaluates arguments, and produces more reliable, explainable AI outputs.
 
