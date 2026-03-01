@@ -131,6 +131,23 @@ This makes it suitable for **decision support**, **education**, and **LLM evalua
   </tr>
 </table>
 
+# 🚀 Run Instructions
 
+1.
+## 📥 Clone Repository
 
+```bash
+git clone https://github.com/Adidem23/Consensus.a.git
+```
+
+2.
+## Run Frontend 🚗
+
+```bash
+
+cd frontend
+npm install
+npm run dev
+
+```
 
