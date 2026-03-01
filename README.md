@@ -133,10 +133,22 @@ This makes it suitable for **decision support**, **education**, and **LLM evalua
 
 # 🚀 Run Instructions
 
+## Prerequisites : 
+
+<ul>
+  
+<li>Gemini API Key</li>
+<li>Mistral API Key</li>
+<li>OPIK Project API Key</li>
+<li>MongoDB Compass Installed on local machine</li>
+
+</ul>
+
+
 ### 📥 Clone Repository
 
 ```bash
-git clone https://github.com/Adidem23/Consensus.a.git
+git clone https://github.com/Adidem23/Consensus.ai.git
 ```
 
 ### Run Frontend 🚗
