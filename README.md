@@ -146,12 +146,44 @@ cd frontend
 npm install
 npm run dev
 ```
-## Run Main Backend
+
+### Run Backend 🔙
 
 ```bash
+
 cd backend
 pip install -r rquirements.txt
 uvicron main:app --relaod
+
+``` 
+### Run Agent Nodes
+
+```bash
+cd backend
+cd supervisor_node
+python __main__.py
 ```
+
+```bash
+cd backend
+cd Gemini_node
+python __main__.py
+```
+
+```bash
+cd backend
+cd mistral_node
+python __main__.py
+```
+
+### Run Central Authority 
+
+```bash
+cd backend
+cd central_authority
+uvicorn main:app --reload
+
+```
+
 
 
